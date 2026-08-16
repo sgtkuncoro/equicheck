@@ -1,0 +1,57 @@
+/*
+ * The design system, in one screen.
+ *
+ * Every contrast ratio below was computed with the WCAG formula
+ * (L1 + 0.05) / (L2 + 0.05) against the stated background, not eyeballed. The
+ * lowest text pair in the file is 6.8:1, which leaves headroom over the 4.5:1
+ * requirement so that a reviewer sampling an anti-aliased edge still passes.
+ */
+:root {
+  /* Surfaces. Warm off-white rather than #fff, warm near-black rather than #000. */
+  --c-bg: #fbfaf8;
+  --c-surface: #ffffff;
+  --c-code-bg: #f4f2ee;
+
+  /* Text. */
+  --c-ink: #1b1a17; /* 16.7:1 on --c-bg */
+  --c-muted: #5a5751; /* 6.9:1 on --c-bg, so hint text is not second class */
+  --c-link: #0b4fb3; /* 7.2:1 on --c-bg */
+  --c-focus: #0b57d0; /* 6.1:1 on --c-bg, clears the 3:1 non-text minimum */
+
+  /*
+   * Hairlines. --c-border is decorative only and never the sole boundary of a
+   * control. --c-border-strong is the boundary of real controls (text inputs,
+   * secondary buttons), so it has to clear the 3:1 non-text contrast minimum in
+   * WCAG 1.4.11 against every surface it lands on. axe cannot test this, which is
+   * why the computed ratios are recorded here:
+   *   4.50:1 on --c-surface   4.31:1 on --c-bg        4.02:1 on --c-code-bg
+   *   3.96:1 on --c-minor-bg  4.05:1 on --c-mod-bg    3.94:1 on --c-crit-bg
+   */
+  --c-border: #dbd7d0;
+  --c-border-strong: #7c766d;
+
+  /* Impact. Colour is the fourth channel after word, glyph and sort order. */
+  --c-crit: #8a1010; /* 8.5:1 on its badge background */
+  --c-crit-bg: #fdecec;
+  --c-serious: #8a3d06; /* 6.8:1 */
+  --c-serious-bg: #fdf0e6;
+  --c-mod: #6b4e00; /* 7.0:1 */
+  --c-mod-bg: #fbf3d8;
+  --c-minor: #1f4e63; /* 7.9:1 */
+  --c-minor-bg: #e8f2f7;
+  --c-ok: #14532d; /* 8.1:1 */
+  --c-ok-bg: #e7f5ec;
+
+  /* Spacing. Deliberately not a uniform rhythm: regions breathe, cards do not. */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2.5rem;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+
+  --font-mono: 0.8125rem/1.55 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+}

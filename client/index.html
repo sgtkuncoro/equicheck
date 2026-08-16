@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- No maximum-scale and no user-scalable=no: both break pinch zoom, which is
+         a WCAG 1.4.4 failure and an axe meta-viewport violation. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Scan a web page or HTML snippet for WCAG accessibility violations, with AI-assisted explanations of each finding."
+    />
+    <title>EquiCheck - accessibility scanner</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

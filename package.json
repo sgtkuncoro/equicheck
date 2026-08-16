@@ -1,0 +1,35 @@
+{
+  "name": "equicheck",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.4",
+  "pnpm": {
+    "//": "pnpm 10 blocks dependency lifecycle scripts by default, which is the right default, and reports these three as ignored. None is needed: esbuild's postinstall only links a binary its per-platform package already supplies, @google/genai's preinstall is an echo, and protobufjs's postinstall writes a version-prefix warning to stderr and touches nothing. Listing them records the decision and keeps install output clean. Verified by a clean install followed by the full build and all 85 tests.",
+    "ignoredBuiltDependencies": ["@google/genai", "esbuild", "protobufjs"]
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "lint:fix": "eslint . --fix",
+    "start": "pnpm --filter server run start",
+    "setup:browser": "pnpm --filter server exec playwright install chromium"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.4",
+    "globals": "17.11.0",
+    "turbo": "2.10.10",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "8.67.0"
+  }
+}

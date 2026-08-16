@@ -1,0 +1,740 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font: 1rem/1.6 ui-sans-serif, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+/* Never remove an outline without replacing it. One rule, greppable, applies
+   to everything focusable including Radix triggers. */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+:where(a) {
+  color: var(--c-link);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  line-height: 1.25;
+  margin: 0;
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Measure, not a 1200px box. */
+.container {
+  max-width: 74ch;
+  margin-inline: auto;
+  padding-inline: var(--sp-4);
+}
+/* Results are selectors and markup, not prose: 74ch wraps them badly. */
+.container--wide {
+  max-width: 96ch;
+}
+
+/* ---------- skip link ---------- */
+
+.skip {
+  position: absolute;
+  left: var(--sp-4);
+  top: -3rem;
+  z-index: 10;
+  background: var(--c-surface);
+  color: var(--c-link);
+  padding: var(--sp-2) var(--sp-3);
+  border: 2px solid var(--c-focus);
+  border-radius: var(--r-sm);
+  font-weight: 600;
+}
+.skip:focus {
+  top: var(--sp-2);
+}
+
+/* ---------- shell ---------- */
+
+.header {
+  border-bottom: 1px solid var(--c-border);
+  background: var(--c-surface);
+  padding-block: var(--sp-5);
+}
+.header__title {
+  font-size: 1.75rem;
+  letter-spacing: -0.01em;
+}
+.header__tagline {
+  margin: var(--sp-2) 0 0;
+  color: var(--c-muted);
+  max-width: 60ch;
+}
+
+.main {
+  padding-block: var(--sp-6);
+}
+.main:focus {
+  outline: none;
+}
+
+.stack > * + * {
+  margin-top: var(--sp-6);
+}
+
+.footer {
+  border-top: 1px solid var(--c-border);
+  padding-block: var(--sp-4);
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- form ---------- */
+
+.panel {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-5);
+}
+.panel__h {
+  font-size: 1.25rem;
+}
+
+.modes {
+  border: 0;
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+.modes__legend {
+  padding: 0;
+  font-weight: 600;
+}
+.modes__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+}
+.modes__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  /* 24px minimum target, WCAG 2.2 SC 2.5.8. */
+  min-height: 1.5rem;
+  cursor: pointer;
+}
+.modes__opt input {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--c-focus);
+  margin: 0;
+}
+
+.field {
+  margin-top: var(--sp-4);
+}
+.field__label {
+  display: block;
+  font-weight: 600;
+}
+.field__hint {
+  margin: var(--sp-1) 0 var(--sp-2);
+  color: var(--c-muted);
+  font-size: 0.875rem;
+  /* The example is a long unbroken URL, which would otherwise push the page wider
+     than the viewport at 320px and fail WCAG 1.4.10 Reflow. */
+  overflow-wrap: anywhere;
+}
+.field__input,
+.field__area {
+  width: 100%;
+  padding: var(--sp-3);
+  font: inherit;
+  color: var(--c-ink);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+}
+.field__area {
+  font: var(--font-mono);
+  min-height: 9rem;
+  resize: vertical;
+}
+.field__input--invalid,
+.field__area--invalid {
+  border-color: var(--c-crit);
+  border-width: 2px;
+}
+.field__err {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+  margin: var(--sp-2) 0 0;
+  color: var(--c-crit);
+  font-weight: 600;
+}
+/* Generated content, never a text node: axe reports a symbol-only element as an
+   unresolvable color-contrast check forever. See .badge__glyph. */
+.field__err-glyph::before {
+  content: '\2715';
+}
+.field__extra {
+  margin: var(--sp-2) 0 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-top: var(--sp-5);
+  flex-wrap: wrap;
+}
+
+.btn {
+  font: inherit;
+  font-weight: 600;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.btn--primary {
+  background: var(--c-focus);
+  color: #fff; /* 6.1:1 */
+}
+.btn--primary[aria-disabled='true'] {
+  background: var(--c-muted);
+  cursor: progress;
+}
+.btn--secondary {
+  background: var(--c-surface);
+  color: var(--c-link);
+  border-color: var(--c-border-strong);
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--c-link);
+  border-color: var(--c-border-strong);
+  padding: var(--sp-2) var(--sp-3);
+  min-height: 2rem;
+  font-size: 0.875rem;
+}
+
+.spinner {
+  width: 0.875rem;
+  height: 0.875rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex: none;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- progress ---------- */
+
+.progress__bar {
+  height: 0.5rem;
+  margin-top: var(--sp-3);
+  border-radius: 999px;
+  background: var(--c-border);
+  overflow: hidden;
+  position: relative;
+}
+.progress__bar::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: 35%;
+  background: var(--c-focus);
+  animation: slide 1.4s ease-in-out infinite;
+}
+@keyframes slide {
+  0% {
+    left: -35%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* A moving bar is the animation; replace it with a static fill rather than
+     leaving an invisible 0.01ms animation and an empty track. */
+  .progress__bar::after {
+    animation: none;
+    left: 0;
+    width: 100%;
+    opacity: 0.45;
+  }
+}
+@media (forced-colors: active) {
+  /* Both the track and the fill resolve to Canvas in High Contrast, so the whole
+     indicator vanishes and the only remaining cue is the spinner in the button. */
+  .progress__bar {
+    border: 1px solid CanvasText;
+  }
+  .progress__bar::after {
+    background: Highlight;
+    forced-color-adjust: none;
+  }
+}
+.progress__note {
+  margin: 0;
+}
+.progress__secs {
+  margin: var(--sp-2) 0 0;
+  color: var(--c-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- banners ---------- */
+
+/*
+ * Three severities share this shape, so each needs a channel that survives
+ * greyscale and High Contrast, where all three collapse to black on white. The
+ * error has a heading; the other two get a text prefix and a distinct border
+ * style, the same redundancy the badges use.
+ */
+.banner {
+  border: 1px solid var(--c-crit);
+  border-left-width: 5px;
+  background: var(--c-crit-bg);
+  color: var(--c-ink);
+  border-radius: var(--r-sm);
+  padding: var(--sp-4);
+}
+.banner__h {
+  color: var(--c-crit);
+  font-size: 1.0625rem;
+}
+.banner p {
+  margin: var(--sp-2) 0 0;
+}
+.banner code {
+  font: var(--font-mono);
+  background: var(--c-surface);
+  padding: 0 0.25em;
+  border-radius: 3px;
+}
+.banner__code {
+  color: var(--c-muted);
+  font-size: 0.8125rem;
+}
+
+.warning,
+.notice {
+  border: 1px solid var(--c-mod);
+  border-left-width: 5px;
+  border-left-style: dashed;
+  background: var(--c-mod-bg);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 0.9375rem;
+}
+.warning::before {
+  content: 'Caution: ';
+  font-weight: 700;
+}
+/* A cancellation is neutral, so it must not wear the caution treatment. */
+.notice {
+  border-color: var(--c-border-strong);
+  border-left-style: solid;
+  background: var(--c-code-bg);
+}
+.notice::before {
+  content: 'Status: ';
+  font-weight: 700;
+}
+
+/* ---------- summary ---------- */
+
+.summary__h {
+  font-size: 1.375rem;
+}
+.summary__lede {
+  margin: var(--sp-2) 0 0;
+  font-size: 1.0625rem;
+}
+.summary__meta {
+  margin: var(--sp-2) 0 0;
+  color: var(--c-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.summary__tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.summary__actions {
+  margin: var(--sp-4) 0 0;
+}
+.summary__also {
+  margin: var(--sp-4) 0 0;
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+
+/* ---------- badges and chips ---------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 0.125rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+/*
+ * The glyph is generated content, never a text node.
+ *
+ * axe's color-contrast rule samples DOM text and evaluates aria-hidden text too,
+ * because a sighted user still sees it, but it declines to judge an element whose
+ * whole content is a symbol and reports it as `incomplete` forever. CSS content
+ * is invisible to it. Putting the character in the badge's own text run instead
+ * would leak it into the accessible name: "multiplication x Critical".
+ *
+ * Border style is the second non-colour channel, and all four differ, so the
+ * levels stay distinguishable in greyscale and in High Contrast.
+ */
+.badge__glyph::before {
+  content: '?';
+}
+.badge--critical {
+  color: var(--c-crit);
+  background: var(--c-crit-bg);
+  border-style: double;
+  border-width: 3px;
+}
+.badge--critical .badge__glyph::before {
+  content: '\2715';
+}
+.badge--serious {
+  color: var(--c-serious);
+  background: var(--c-serious-bg);
+  border-style: solid;
+}
+.badge--serious .badge__glyph::before {
+  content: '!';
+}
+.badge--moderate {
+  color: var(--c-mod);
+  background: var(--c-mod-bg);
+  border-style: dashed;
+}
+.badge--moderate .badge__glyph::before {
+  content: '\25b2';
+}
+.badge--minor {
+  color: var(--c-minor);
+  background: var(--c-minor-bg);
+  border-style: dotted;
+}
+.badge--minor .badge__glyph::before {
+  content: '\2139';
+}
+.badge--none {
+  color: var(--c-muted);
+  background: var(--c-code-bg);
+  border-style: dotted;
+}
+
+@media (forced-colors: active) {
+  /* Restate only the colours. The `border` shorthand would reset border-style to
+     solid, deleting the one channel that still distinguishes the levels once
+     every badge has collapsed to the same system colour. */
+  .badge {
+    border-color: CanvasText;
+    color: CanvasText;
+    background: Canvas;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.chip {
+  font: var(--font-mono);
+  background: var(--c-code-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  padding: 0 0.375rem;
+}
+
+/* ---------- accordion ---------- */
+
+.acc {
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-md);
+  background: var(--c-surface);
+  overflow: visible;
+}
+.acc__item + .acc__item {
+  border-top: 1px solid var(--c-border);
+}
+.acc__heading {
+  margin: 0;
+  font-size: 1rem;
+}
+.acc__trigger {
+  display: flex;
+  align-items: center;
+  /* Wraps at narrow widths. Without it the two nowrap children, the badge and
+     the element count, push the row past a 320px viewport and the page gains a
+     horizontal scrollbar, which is a WCAG 1.4.10 Reflow failure. */
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--sp-3) var(--sp-4);
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+.acc__trigger:hover {
+  background: var(--c-code-bg);
+}
+.acc__title {
+  flex: 1 1 12ch;
+  /* A flex item's default min-width is auto, so a long unbroken rule name would
+     refuse to shrink and overflow the row. */
+  min-width: 0;
+  font-weight: 600;
+}
+.acc__count {
+  color: var(--c-muted);
+  font-size: 0.875rem;
+}
+.acc__chevron {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--c-muted);
+  border-bottom: 2px solid var(--c-muted);
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.acc__trigger[data-state='open'] .acc__chevron {
+  transform: rotate(-135deg);
+}
+/* overflow lives on the panel, never on the item, so a focus ring on a trigger
+   is never clipped. */
+.acc__content {
+  overflow: hidden;
+  padding: 0 var(--sp-4) var(--sp-4);
+  border-top: 1px dashed var(--c-border);
+}
+
+.detail__desc {
+  margin: var(--sp-4) 0 0;
+}
+.detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0 0;
+}
+.detail__h {
+  margin: var(--sp-5) 0 var(--sp-2);
+  font-size: 1rem;
+}
+
+.nodes {
+  margin: 0;
+  padding: 0 0 0 var(--sp-5);
+}
+.nodes > li + li {
+  margin-top: var(--sp-4);
+}
+.node__target {
+  font: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.node__summary {
+  white-space: pre-line;
+  margin: var(--sp-2) 0;
+  color: var(--c-muted);
+  font-size: 0.9375rem;
+}
+
+/* ---------- code snippets ---------- */
+
+.snippet {
+  margin: var(--sp-2) 0;
+}
+.snippet__cap {
+  font-size: 0.8125rem;
+  color: var(--c-muted);
+  margin-bottom: var(--sp-1);
+}
+.snippet__pre {
+  margin: 0;
+  max-height: 16rem;
+  overflow: auto;
+  /* Wrap rather than scroll sideways, and break a 400-char data URI mid-token. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 2;
+  padding: var(--sp-3);
+  background: var(--c-code-bg);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font: var(--font-mono);
+}
+.snippet__note {
+  margin: var(--sp-1) 0 0;
+  font-size: 0.8125rem;
+  color: var(--c-muted);
+}
+
+/* ---------- help panel ---------- */
+
+.help {
+  margin-top: var(--sp-3);
+  border: 1px solid var(--c-border-strong);
+  border-left: 5px solid var(--c-minor);
+  border-radius: var(--r-sm);
+  background: var(--c-minor-bg);
+  padding: var(--sp-4);
+}
+.help__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.help__status {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--c-minor);
+  font-weight: 600;
+}
+.help__h {
+  margin: var(--sp-2) 0;
+  font-size: 0.9375rem;
+  color: var(--c-minor);
+}
+.help__disclaimer {
+  margin: var(--sp-3) 0 0;
+  font-size: 0.8125rem;
+  color: var(--c-ink);
+  border-top: 1px dashed var(--c-border-strong);
+  padding-top: var(--sp-2);
+}
+.help__error {
+  margin: var(--sp-2) 0 0;
+  font-weight: 600;
+}
+.help__actions {
+  margin: var(--sp-3) 0 0;
+}
+
+.md > :first-child {
+  margin-top: 0;
+}
+.md h6 {
+  font-size: 0.9375rem;
+  margin: var(--sp-3) 0 var(--sp-1);
+}
+.md p,
+.md ul,
+.md ol {
+  margin: var(--sp-2) 0;
+}
+.md :not(pre) > code {
+  font: var(--font-mono);
+  background: var(--c-surface);
+  padding: 0 0.25em;
+  border-radius: 3px;
+  overflow-wrap: anywhere;
+}
+.md pre {
+  margin: var(--sp-2) 0;
+  max-height: 16rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: var(--sp-3);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-sm);
+  font: var(--font-mono);
+}
+
+/* ---------- empty state ---------- */
+
+.empty__h {
+  font-size: 1.375rem;
+  color: var(--c-ok);
+}
+.empty p {
+  margin: var(--sp-3) 0 0;
+}
+.empty__caveat {
+  border-left: 4px solid var(--c-ok);
+  background: var(--c-ok-bg);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-sm);
+}
