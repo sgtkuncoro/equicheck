@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { ScanRequest } from '../../shared/wire.ts';
+import type { ScanRequest } from 'shared/wire';
 import { EmptyState } from './components/EmptyState.tsx';
 import { ErrorBanner } from './components/ErrorBanner.tsx';
 import { ResultsSummary } from './components/ResultsSummary.tsx';

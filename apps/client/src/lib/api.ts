@@ -5,7 +5,7 @@ import type {
   ExplainResponse,
   ScanRequest,
   ScanResponse,
-} from '../../../shared/wire.ts';
+} from 'shared/wire';
 
 /** Carries the server's machine code so callers can react to it without string matching on prose. */
 export class ApiError extends Error {

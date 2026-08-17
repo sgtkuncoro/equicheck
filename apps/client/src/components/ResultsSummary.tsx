@@ -1,4 +1,4 @@
-import type { Impact, ScanResponse } from '../../../shared/wire.ts';
+import type { Impact, ScanResponse } from 'shared/wire';
 import { IMPACT_ORDER } from '../lib/impact.ts';
 import { ImpactBadge } from './ImpactBadge.tsx';
 

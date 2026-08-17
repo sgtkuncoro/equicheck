@@ -36,7 +36,7 @@ importers:
         specifier: 8.67.0
         version: 8.67.0(eslint@9.39.5)(typescript@5.9.3)
 
-  client:
+  apps/client:
     dependencies:
       '@radix-ui/react-accordion':
         specifier: ^1.2.20
@@ -63,6 +63,9 @@ importers:
       eslint:
         specifier: 9.39.5
         version: 9.39.5
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -70,7 +73,7 @@ importers:
         specifier: ^8.2.0
         version: 8.2.1(@types/node@20.19.43)(esbuild@0.28.2)(tsx@4.23.12)
 
-  server:
+  apps/server:
     dependencies:
       '@axe-core/playwright':
         specifier: ^4.13.0
@@ -100,6 +103,9 @@ importers:
       eslint:
         specifier: 9.39.5
         version: 9.39.5
+      shared:
+        specifier: workspace:*
+        version: link:../../packages/shared
       tsx:
         specifier: ^4.19.0
         version: 4.23.12
@@ -109,6 +115,15 @@ importers:
       vitest:
         specifier: ^3.2.0
         version: 3.2.7(@types/debug@4.1.13)(@types/node@20.19.43)(lightningcss@1.33.0)(tsx@4.23.12)
+
+  packages/shared:
+    devDependencies:
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5
+      typescript:
+        specifier: ~5.9.3
+        version: 5.9.3
 
 packages:
 

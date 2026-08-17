@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import type { WireNode } from '../../../shared/wire.ts';
+import type { WireNode } from 'shared/wire';
 import type { HelpState } from '../hooks/useHelp.ts';
 import { CodeSnippet } from './CodeSnippet.tsx';
 import { HelpPanel } from './HelpPanel.tsx';

@@ -1,10 +1,10 @@
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 
-// The .env lives at the repo root, not in server/, so a reviewer only has one
+// The .env lives at the repo root, not in apps/server/, so a reviewer only has one
 // file to fill in. Resolved from this module rather than cwd so `pnpm start`
-// works from either the root or server/.
-dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)), quiet: true });
+// works from either the root or apps/server/.
+dotenv.config({ path: fileURLToPath(new URL('../../../.env', import.meta.url)), quiet: true });
 
 function positiveInt(name: string, fallback: number): number {
   const parsed = Number.parseInt(process.env[name] ?? '', 10);

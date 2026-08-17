@@ -1,4 +1,4 @@
-import type { ScanResponse } from '../../../shared/wire.ts';
+import type { ScanResponse } from 'shared/wire';
 
 /**
  * A clean scan is not a clean bill of health, and saying so is the most important

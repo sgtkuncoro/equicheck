@@ -1,6 +1,6 @@
 import type { AxeResults, NodeResult, Result } from 'axe-core';
 import { limits } from '../config.js';
-import type { Impact, ScanCounts, WireNode, WireViolation } from '../../../shared/wire.js';
+import type { Impact, ScanCounts, WireNode, WireViolation } from 'shared/wire';
 
 /** Most severe first. Also the display order the client relies on. */
 const IMPACT_RANK: Record<Impact, number> = { critical: 0, serious: 1, moderate: 2, minor: 3 };

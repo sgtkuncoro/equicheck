@@ -48,7 +48,7 @@ export default tseslint.config(
 
   // ---------------------------------------------------------------- client
   {
-    files: ['client/**/*.{ts,tsx}'],
+    files: ['apps/client/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
@@ -63,7 +63,7 @@ export default tseslint.config(
   },
 
   {
-    files: ['client/**/*.tsx'],
+    files: ['apps/client/**/*.tsx'],
     ...jsxA11y.flatConfigs.recommended,
     rules: {
       ...jsxA11y.flatConfigs.recommended.rules,
@@ -89,7 +89,7 @@ export default tseslint.config(
 
   // ---------------------------------------------------------------- server
   {
-    files: ['server/**/*.ts'],
+    files: ['apps/server/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
 );

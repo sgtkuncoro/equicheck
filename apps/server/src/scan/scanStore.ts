@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { limits } from '../config.js';
-import type { ScanResponse, WireNode, WireViolation } from '../../../shared/wire.js';
+import type { ScanResponse, WireNode, WireViolation } from 'shared/wire';
 
 interface Entry {
   response: ScanResponse;

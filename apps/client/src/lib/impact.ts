@@ -1,4 +1,4 @@
-import type { Impact } from '../../../shared/wire.ts';
+import type { Impact } from 'shared/wire';
 
 interface ImpactStyle {
   label: string;

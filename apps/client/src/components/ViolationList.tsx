@@ -1,5 +1,5 @@
 import * as Accordion from '@radix-ui/react-accordion';
-import type { ScanResponse, WireViolation } from '../../../shared/wire.ts';
+import type { ScanResponse, WireViolation } from 'shared/wire';
 import type { UseHelp } from '../hooks/useHelp.ts';
 import { ImpactBadge } from './ImpactBadge.tsx';
 import { NodeCard } from './NodeCard.tsx';

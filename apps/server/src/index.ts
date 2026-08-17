@@ -16,7 +16,7 @@ import type {
   HealthResponse,
   ScanRequest,
   ScanResponse,
-} from '../../shared/wire.js';
+} from 'shared/wire';
 
 const app = express();
 app.disable('x-powered-by');

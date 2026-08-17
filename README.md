@@ -46,14 +46,14 @@ button returns a clear configuration error rather than failing silently.
 ### Commands
 
 Everything except `start` and `setup:browser` runs through Turborepo, so each task is
-cached and the two packages run in parallel.
+cached and every package runs in parallel.
 
 |Command|What it does|
 |---|---|
 |`pnpm dev`|Both dev servers, `turbo run dev`|
 |`pnpm test`|Vitest suite, 85 tests. Launches Chromium; no internet required|
-|`pnpm typecheck`|`tsc --noEmit` in both packages, in parallel|
-|`pnpm lint`|ESLint in both packages|
+|`pnpm typecheck`|`tsc --noEmit` in every package, in parallel|
+|`pnpm lint`|ESLint in every package|
 |`pnpm build`|Production client bundle|
 |`pnpm lint:fix`|ESLint autofix across the repo. Not a turbo task, because it mutates source|
 |`pnpm setup:browser`|`playwright install chromium`|
@@ -72,11 +72,11 @@ POST /api/explain  { scanId, violationId, nodeIndex }
 
 ```
 package.json          pnpm workspace root, scripts route through turbo
-pnpm-workspace.yaml   the two packages
+pnpm-workspace.yaml   apps/* and packages/*
 turbo.json            the task graph
-eslint.config.js      one flat config for both packages, scoped by glob
-shared/wire.ts        the HTTP contract, imported type-only by both sides
-server/src/
+eslint.config.js      one flat config for every package, scoped by glob
+packages/shared/wire.ts  the HTTP contract, imported type-only by both apps
+apps/server/src/
   index.ts            Express app, both routes, concurrency cap, error handler
   config.ts           env parsing plus the hard limits table
   errors.ts           ServiceError: a machine code, an HTTP status, a user-safe message
@@ -90,7 +90,7 @@ server/src/
     scanStore.ts      short-lived scan cache so /api/explain never trusts the client
   llm/gemini.ts       system instruction, prompt construction, error mapping
   http/rateLimit.ts   fixed-window limiter
-client/src/
+apps/client/src/
   App.tsx             landmarks, page state, document title
   hooks/              useScan, useHelp
   lib/                api (the only fetch), normalizeUrl, impact presentation
@@ -100,69 +100,85 @@ client/src/
 
 ### Repo shape
 
-Two packages, `client/` and `server/`, rather than one flat one. A Node server and a browser
-bundle want genuinely different TypeScript settings (`NodeNext` with `node` types versus
-`bundler` with the DOM lib), and one `tsconfig.json` cannot express both without splitting into
-two anyway. Separate packages also mean the client cannot accidentally import a server-only
-module.
+Three packages under two roles. `apps/client/` and `apps/server/` are deployable applications; `packages/shared/`
+is not deployed on its own, it exists only to be imported. That split, `apps/` versus `packages/`, is the standard
+Turborepo convention and is why the directories are named that way rather than left flat at the repo root.
 
-`shared/wire.ts` is not a third workspace package. Both sides import it with `import type`, so it
-is erased at compile time and needs no build, no `paths` mapping and no `dist`. One contract, one
-place, zero build machinery. It does need one line of `turbo.json`, for the reason below.
+`apps/client/` and `apps/server/` stay separate rather than merging into one package. A Node server and a browser
+bundle want genuinely different TypeScript settings (`NodeNext` with `node` types versus `bundler` with the DOM
+lib), and one `tsconfig.json` cannot express both without splitting into two anyway. Separate packages also mean
+the client cannot accidentally import a server-only module.
+
+`packages/shared/` holds `wire.ts`, the HTTP contract, and both apps depend on it as an ordinary workspace package
+(`"shared": "workspace:*"`, resolved by pnpm to a symlink in each app's `node_modules`). Both sides still import it
+with `import type`, so it is erased at compile time. It has no `build` script and no `dist`: its `package.json`
+`exports` field points `shared/wire` straight at `wire.ts`, and `tsc`'s `bundler` and `NodeNext` resolution modes,
+and `tsx` at runtime, all read TypeScript source directly through that map. One contract, one package, zero build
+machinery. It does need two lines of `turbo.json`, for the reason below.
 
 The server runs from source through `tsx` in both dev and production, with `tsc --noEmit` as a
 separate typecheck. For a prototype this removes an entire build-output surface, and there is no
 scenario in this exercise where the emitted JavaScript matters. It also means the server has no
 `build` script at all, and deliberately not a no-op one: Turborepo silently skips packages with
-no matching script, so a placeholder would only misstate the architecture.
+no matching script, so a placeholder would only misstate the architecture. `shared` has no `build`
+script either, for the same reason, but for a different consequence covered below: skipping the
+script does not skip the package from the task graph.
 
 ---
 
 ## Monorepo tooling
 
-No speed argument here. The full pipeline is **4.8 seconds cold** across two packages with no
-dependency between them, so caching it saves nothing anyone will notice. If speed were the case
-for adopting Turborepo, there would not be one.
+No speed argument here. The full pipeline is **~4 seconds cold** across three packages with only
+one real dependency edge (`client` and `server` both depend on `shared`), so caching it saves
+nothing anyone will notice. If speed were the case for adopting Turborepo, there would not be one.
 
 The case is that the repo will not stay this size, and the config that makes a task graph
-correct is cheaper to write now, at 20 lines against two packages, than to retrofit after a third
-package and a CI pipeline exist. It also removed the last place this repo ran things serially by
-hand: `typecheck` was a `&&` chain across two packages and now runs both at once. That is a
-modest argument and it is the whole of it.
+correct is cheaper to write now, at 25 lines against three packages, than to retrofit after a
+fourth package and a CI pipeline exist. It also removed the last place this repo ran things
+serially by hand: `typecheck` was a `&&` chain across packages and now runs all of them at once.
+That is a modest argument and it is the whole of it.
 
 What is worth reading is the one non-obvious **cost** of adopting it, because it is a trap rather
 than a feature, and it is the sort of thing that is easy to ship without noticing.
 
-A cache can be wrong. `shared/wire.ts` is the HTTP contract, it lives at the repo root, and both
-packages compile it through a relative `import type`. Turborepo hashes each package from the
-files inside that package, so the contract is in neither package's input set. Rename a field on
-`ScanResponse` and both packages report a **cache hit and replay a green typecheck**, while the
-real `tsc` run against the new file would have failed. A stale green build is the worst thing a
-cache can do, because it is silent, and plain npm scripts could never produce it: they have no
-cache, so they always re-run. Adopting turbo creates this, and one line pays for it:
+A cache can be wrong. Turborepo hashes a task from its own package's files plus, only for tasks
+that declare `dependsOn: ["^taskName"]`, the hash of that same task in every package it depends
+on. `client` and `server` both list `shared` as a workspace dependency, but `typecheck`, `test`
+and `lint` originally had no `dependsOn` at all: nothing wired `shared`'s files into `client`'s or
+`server`'s hash. Rename a field on `ScanResponse` in `packages/shared/wire.ts` and every downstream
+task reports a **cache hit and replays a green typecheck**, while the real `tsc` run against the
+new file would have failed. A stale green build is the worst thing a cache can do, because it is
+silent, and plain npm scripts could never produce it: they have no cache, so they always re-run.
+Adopting turbo creates this, and three lines pay for it:
 
 ```json
-"globalDependencies": ["shared/**"]
+"typecheck": { "dependsOn": ["^build"] },
+"test":      { "dependsOn": ["^build"] },
+"lint":      { "dependsOn": ["^build"] }
 ```
 
-The glob rather than the single filename, because both tsconfigs already declare
-`../shared/**/*.ts` as compiler input, so a second file landing in `shared/` would otherwise walk
-straight back into the same hole.
+`^build` rather than `^typecheck` or a `shared`-specific task, because `shared` has no scripts of
+its own to depend on and the edge only needs to exist, not resolve to a script that runs. Turborepo
+still walks the dependency graph and folds `shared`'s file hash into every downstream task even
+though `shared`'s `build` is skipped as missing, the same way `server`'s missing `build` script is
+skipped when `client` and `server` themselves have no dependency between them.
 
 Verified rather than assumed. `turbo run typecheck build test lint` twice reports
-`6 cached, 6 total  >>> FULL TURBO`; appending a line to `shared/wire.ts` and rerunning reports
-`0 cached, 6 total`, so every task correctly misses.
+`8 cached, 8 total  >>> FULL TURBO`; appending a line to `packages/shared/wire.ts` and rerunning
+reports `0 cached, 8 total`, with `client` and `server`'s `typecheck`, `test` and `lint` all
+missing alongside `shared`'s own tasks. A change confined to `apps/client/` was checked the same
+way and, correctly, left every `server` and `shared` task cached.
 
 `eslint.config.js` has the same shape of problem and deliberately not the same fix. It is listed
-in the `lint` task's `inputs` with `$TURBO_ROOT$` instead of in `globalDependencies`, because a
-lint-rule tweak has no business invalidating the three-second Chromium test run. Also verified:
-touching it misses both `lint` tasks and leaves `test` cached.
+in the `lint` task's `inputs` with `$TURBO_ROOT$` instead of relying on the dependency graph,
+because a lint-rule tweak has no business invalidating the three-second Chromium test run. Also
+verified: touching it misses every `lint` task and leaves `test` cached.
 
 `ui` is pinned to `stream` instead of the default. `tui` gives each persistent task its own pane,
 so a boot-time warning on one task sits behind a pane the reader has to switch to. `stream`
 interleaves both into one scroll, which puts the Vite URL and the server's `GEMINI_API_KEY`
 warning in the same view without anyone needing to know a keybinding. `clearScreen: false` in
-`client/vite.config.ts` is the other half: Vite otherwise wipes the shared terminal on start and
+`apps/client/vite.config.ts` is the other half: Vite otherwise wipes the shared terminal on start and
 takes the server's warning with it.
 
 `start`, `setup:browser` and `lint:fix` stay outside turbo. The first two are a single
@@ -188,7 +204,7 @@ notice on every install, and it was confirmed by a clean install followed by the
 all 85 tests.
 
 pnpm not hoisting binaries is the trap worth knowing about here, and it bit this repo twice.
-`eslint` had to become a devDependency of both packages, not just the root, or a package's `lint`
+`eslint` had to become a devDependency of `client`, `server` and `shared`, not just the root, or a package's `lint`
 script cannot find it. And `setup:browser` had to become
 `pnpm --filter server exec playwright install chromium`, because `playwright` belongs to the
 server package and the bare command exits 127 from the root. That one mattered: it is the first
@@ -198,7 +214,7 @@ command in Quick start and the recovery step two in-app error messages tell you 
 
 One flat config at the root, scoped by glob, rather than one per package: a rule decision gets
 made once, where the tradeoffs sit next to each other. Per-package `lint` scripts keep turbo
-caching the two packages independently. `eslint` is a devDependency of both packages as well as
+caching all three packages independently. `eslint` is a devDependency of `client`, `server` and `shared` as well as
 the root, because pnpm does not hoist binaries into a package's `node_modules/.bin`.
 
 ESLint is pinned to the 9.x line even though 10 is out, because `eslint-plugin-jsx-a11y` peers
@@ -214,7 +230,7 @@ lint time to duplicate what two `tsc --noEmit` tasks already cover.
 Two rule decisions are worth reading in `eslint.config.js` rather than skimming past:
 
 - `no-unused-vars` gets `argsIgnorePattern: '^_'`. The load-bearing case is `handleErrors` in
-  `server/src/index.ts`. Express identifies error middleware by its four-parameter arity, so
+  `apps/server/src/index.ts`. Express identifies error middleware by its four-parameter arity, so
   deleting the unused `_next` would silently turn every error response into Express's default
   HTML 500 page, with no compile error and no failing test.
 - `jsx-a11y/no-noninteractive-tabindex` is **widened, not disabled**, to accept `role="group"`.

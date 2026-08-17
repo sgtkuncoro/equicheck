@@ -1,4 +1,4 @@
-import type { ErrorCode } from '../../../shared/wire.ts';
+import type { ErrorCode } from 'shared/wire';
 
 interface Props {
   code: string;

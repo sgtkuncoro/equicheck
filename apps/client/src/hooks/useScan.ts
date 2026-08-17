@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ScanRequest, ScanResponse } from '../../../shared/wire.ts';
+import type { ScanRequest, ScanResponse } from 'shared/wire';
 import { ApiError, requestScan } from '../lib/api.ts';
 
 export type ScanState =

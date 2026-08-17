@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react';
-import type { ScanRequest } from '../../../shared/wire.ts';
+import type { ScanRequest } from 'shared/wire';
 import { normalizeUrl, type UrlCheck } from '../lib/normalizeUrl.ts';
 
 interface Props {

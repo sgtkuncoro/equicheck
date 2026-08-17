@@ -1,4 +1,4 @@
-import type { ApiErrorBody, ErrorCode } from '../../shared/wire.js';
+import type { ApiErrorBody, ErrorCode } from 'shared/wire';
 
 const STATUS: Record<ErrorCode, number> = {
   INVALID_INPUT: 400,
